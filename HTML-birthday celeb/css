@@ -1,0 +1,537 @@
+// Birthday Celebration JavaScript
+class BirthdayCelebration {
+    constructor() {
+        this.isPlaying = false;
+        this.confettiInterval = null;
+        this.heartsInterval = null;
+        this.musicPlaying = false;
+        this.audioContext = null;
+        this.birthdayPersonName = '';
+        this.init();
+    }
+
+    init() {
+        // Add event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            this.setupEventListeners();
+            this.setupNameInput();
+        });
+
+        // Keyboard shortcuts for celebration screen
+        document.addEventListener('keydown', (e) => {
+            const celebrationContainer = document.getElementById('celebrationContainer');
+            if (celebrationContainer.style.display !== 'none') {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    this.triggerExtraCelebration();
+                }
+                if (e.code === 'Enter') {
+                    this.blowCandles();
+                }
+            }
+        });
+
+        // Click sparkles (only on celebration screen)
+        document.addEventListener('click', (e) => {
+            const celebrationContainer = document.getElementById('celebrationContainer');
+            if (celebrationContainer.style.display !== 'none') {
+                this.createSparkle(e.clientX, e.clientY);
+            }
+        });
+    }
+
+    setupNameInput() {
+        const nameInput = document.getElementById('birthdayPersonName');
+        const startBtn = document.querySelector('.start-btn');
+
+        // Enable/disable button based on input
+        nameInput.addEventListener('input', (e) => {
+            const name = e.target.value.trim();
+            startBtn.disabled = name.length === 0;
+        });
+
+        // Allow Enter key to start celebration
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && nameInput.value.trim()) {
+                this.startBirthdayCelebration();
+            }
+        });
+
+        // Focus on input when page loads
+        setTimeout(() => nameInput.focus(), 500);
+    }
+
+    setupEventListeners() {
+        // These will be set up after the celebration screen is shown
+    }
+
+    startBirthdayCelebration() {
+        const nameInput = document.getElementById('birthdayPersonName');
+        const name = nameInput.value.trim();
+        
+        if (!name) {
+            nameInput.focus();
+            return;
+        }
+
+        this.birthdayPersonName = name;
+        this.transitionToCelebration();
+    }
+
+    transitionToCelebration() {
+        const nameInputScreen = document.getElementById('nameInputScreen');
+        const celebrationContainer = document.getElementById('celebrationContainer');
+        const nameDisplay = document.getElementById('nameDisplay');
+        const personalWish = document.getElementById('personalWish');
+
+        // Update name display
+        nameDisplay.textContent = this.birthdayPersonName + '!';
+        
+        // Update personal wish
+        personalWish.innerHTML = `🎈 ${this.birthdayPersonName}, here's to another year of wonderful memories and amazing adventures! 🎈`;
+
+        // Transition screens
+        nameInputScreen.classList.add('screen-transition');
+        
+        setTimeout(() => {
+            nameInputScreen.style.display = 'none';
+            celebrationContainer.style.display = 'flex';
+            celebrationContainer.classList.add('celebration-entrance');
+            
+            // Start the celebration sequence
+            this.startCelebrationSequence();
+        }, 1000);
+    }
+
+    startCelebrationSequence() {
+        // Start Happy Birthday music
+        setTimeout(() => {
+            this.playHappyBirthdayMusic();
+        }, 500);
+
+        // Animate balloons entrance
+        setTimeout(() => {
+            this.animateBalloonsEntrance();
+        }, 1000);
+
+        // Start automatic celebration
+        setTimeout(() => {
+            this.startAutoCelebration();
+        }, 2000);
+
+        // Setup event listeners for celebration screen
+        setTimeout(() => {
+            this.setupCelebrationEventListeners();
+        }, 1500);
+    }
+
+    setupCelebrationEventListeners() {
+        // Auto sparkles every 8 seconds
+        setInterval(() => {
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight;
+            this.createSparkle(x, y);
+        }, 8000);
+
+        // Auto floating hearts every 12 seconds
+        setInterval(() => {
+            this.createFloatingHeart();
+        }, 12000);
+    }
+
+    animateBalloonsEntrance() {
+        const balloonsContainer = document.querySelector('.balloons-container');
+        const balloons = balloonsContainer.querySelectorAll('.balloon');
+        
+        balloonsContainer.classList.add('celebration-sequence');
+        
+        balloons.forEach((balloon, index) => {
+            balloon.style.transform = 'translateY(100vh) scale(0)';
+            balloon.style.opacity = '0';
+            
+            setTimeout(() => {
+                balloon.classList.add('balloon-entrance');
+                balloon.style.transform = '';
+                balloon.style.opacity = '';
+            }, index * 200);
+        });
+    }
+
+    playHappyBirthdayMusic() {
+        // Create Happy Birthday melody using Web Audio API
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Happy Birthday melody notes (simplified)
+        const melody = [
+            { note: 261.63, duration: 0.5 }, // C
+            { note: 261.63, duration: 0.5 }, // C
+            { note: 293.66, duration: 1.0 }, // D
+            { note: 261.63, duration: 1.0 }, // C
+            { note: 349.23, duration: 1.0 }, // F
+            { note: 329.63, duration: 2.0 }, // E
+            
+            { note: 261.63, duration: 0.5 }, // C
+            { note: 261.63, duration: 0.5 }, // C
+            { note: 293.66, duration: 1.0 }, // D
+            { note: 261.63, duration: 1.0 }, // C
+            { note: 392.00, duration: 1.0 }, // G
+            { note: 349.23, duration: 2.0 }, // F
+            
+            { note: 261.63, duration: 0.5 }, // C
+            { note: 261.63, duration: 0.5 }, // C
+            { note: 523.25, duration: 1.0 }, // C (high)
+            { note: 440.00, duration: 1.0 }, // A
+            { note: 349.23, duration: 1.0 }, // F
+            { note: 329.63, duration: 1.0 }, // E
+            { note: 293.66, duration: 1.0 }, // D
+            
+            { note: 466.16, duration: 0.5 }, // Bb
+            { note: 466.16, duration: 0.5 }, // Bb
+            { note: 440.00, duration: 1.0 }, // A
+            { note: 349.23, duration: 1.0 }, // F
+            { note: 392.00, duration: 1.0 }, // G
+            { note: 349.23, duration: 2.0 }  // F
+        ];
+
+        this.playMelody(melody);
+        this.musicPlaying = true;
+        
+        const musicBtn = document.querySelector('.music-btn');
+        if (musicBtn) {
+            musicBtn.classList.add('playing');
+            musicBtn.textContent = '🎵 Music Playing 🎵';
+        }
+    }
+
+    playMelody(melody) {
+        let currentTime = this.audioContext.currentTime;
+        
+        melody.forEach((note) => {
+            const oscillator = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(this.audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(note.note, currentTime);
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + note.duration);
+            
+            oscillator.start(currentTime);
+            oscillator.stop(currentTime + note.duration);
+            
+            currentTime += note.duration;
+        });
+
+        // Loop the melody
+        setTimeout(() => {
+            if (this.musicPlaying) {
+                this.playMelody(melody);
+            }
+        }, currentTime * 1000);
+    }
+
+    toggleMusic() {
+        const musicBtn = document.querySelector('.music-btn');
+        
+        if (this.musicPlaying) {
+            this.musicPlaying = false;
+            musicBtn.classList.remove('playing');
+            musicBtn.textContent = '🎵 Play Music 🎵';
+        } else {
+            this.playHappyBirthdayMusic();
+        }
+    }
+
+    startAutoCelebration() {
+        this.isPlaying = true;
+        this.createFireworks();
+        this.startConfetti();
+        this.createFloatingHearts();
+        this.shakeCake();
+        
+        // Stop auto celebration after 4 seconds
+        setTimeout(() => {
+            this.stopCelebration();
+        }, 4000);
+    }
+
+    triggerExtraCelebration() {
+        if (this.isPlaying) return;
+        
+        this.isPlaying = true;
+        this.playCelebrationSound();
+        this.createFireworks();
+        this.startConfetti();
+        this.createFloatingHearts();
+        this.shakeCake();
+        
+        // Stop celebration after 5 seconds
+        setTimeout(() => {
+            this.stopCelebration();
+        }, 5000);
+    }
+
+    stopCelebration() {
+        this.isPlaying = false;
+        if (this.confettiInterval) {
+            clearInterval(this.confettiInterval);
+            this.confettiInterval = null;
+        }
+        if (this.heartsInterval) {
+            clearInterval(this.heartsInterval);
+            this.heartsInterval = null;
+        }
+    }
+
+    playCelebrationSound() {
+        // Create musical celebration sound using Web Audio API
+        if (!this.audioContext) {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        const notes = [523.25, 587.33, 659.25, 698.46, 783.99]; // C, D, E, F, G
+        
+        notes.forEach((frequency, index) => {
+            setTimeout(() => {
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.2, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + 0.5);
+            }, index * 150);
+        });
+    }
+
+    createFireworks() {
+        const fireworksContainer = document.querySelector('.fireworks-container');
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#FD79A8'];
+        
+        for (let i = 0; i < 10; i++) {
+            setTimeout(() => {
+                const firework = document.createElement('div');
+                firework.className = 'firework';
+                firework.style.left = Math.random() * 100 + '%';
+                firework.style.top = Math.random() * 50 + 20 + '%';
+                firework.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                fireworksContainer.appendChild(firework);
+                
+                // Remove firework after animation
+                setTimeout(() => {
+                    if (firework.parentNode) {
+                        firework.parentNode.removeChild(firework);
+                    }
+                }, 1000);
+            }, i * 150);
+        }
+    }
+
+    startConfetti() {
+        const confettiContainer = document.querySelector('.confetti-container');
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#FD79A8', '#A29BFE'];
+        
+        this.confettiInterval = setInterval(() => {
+            for (let i = 0; i < 6; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                
+                confettiContainer.appendChild(confetti);
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    if (confetti.parentNode) {
+                        confetti.parentNode.removeChild(confetti);
+                    }
+                }, 3000);
+            }
+        }, 250);
+    }
+
+    createFloatingHearts() {
+        const heartsContainer = document.querySelector('.hearts-container');
+        
+        this.heartsInterval = setInterval(() => {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + '%';
+            
+            heartsContainer.appendChild(heart);
+            
+            // Remove heart after animation
+            setTimeout(() => {
+                if (heart.parentNode) {
+                    heart.parentNode.removeChild(heart);
+                }
+            }, 4000);
+        }, 600);
+    }
+
+    createFloatingHeart() {
+        const heartsContainer = document.querySelector('.hearts-container');
+        const hearts = ['💖', '💕', '💗', '💝'];
+        const heart = document.createElement('div');
+        heart.className = 'floating-heart';
+        heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
+        heart.style.left = Math.random() * 100 + '%';
+        
+        heartsContainer.appendChild(heart);
+        
+        setTimeout(() => {
+            if (heart.parentNode) {
+                heart.parentNode.removeChild(heart);
+            }
+        }, 4000);
+    }
+
+    createSparkle(x, y) {
+        const sparkles = ['✨', '⭐', '🌟', '💫'];
+        const sparkle = document.createElement('div');
+        sparkle.innerHTML = sparkles[Math.floor(Math.random() * sparkles.length)];
+        sparkle.style.position = 'fixed';
+        sparkle.style.left = x + 'px';
+        sparkle.style.top = y + 'px';
+        sparkle.style.fontSize = '1.5rem';
+        sparkle.style.pointerEvents = 'none';
+        sparkle.style.zIndex = '9999';
+        sparkle.style.animation = 'sparkleEffect 1s ease-out forwards';
+        
+        document.body.appendChild(sparkle);
+        
+        setTimeout(() => {
+            if (sparkle.parentNode) {
+                sparkle.parentNode.removeChild(sparkle);
+            }
+        }, 1000);
+    }
+
+    shakeCake() {
+        const cake = document.querySelector('.cake');
+        if (cake) {
+            cake.style.animation = 'none';
+            cake.offsetHeight; // Trigger reflow
+            cake.style.animation = 'cakeShake 0.5s ease-in-out 3';
+        }
+    }
+
+    blowCandles() {
+        const flames = document.querySelectorAll('.flame');
+        
+        flames.forEach((flame, index) => {
+            setTimeout(() => {
+                flame.style.opacity = '0';
+                flame.style.transform = 'translateX(-50%) scale(0)';
+            }, index * 100);
+        });
+
+        // Show wish message
+        setTimeout(() => {
+            this.showWishMessage();
+        }, 1000);
+
+        // Relight candles after 3 seconds
+        setTimeout(() => {
+            flames.forEach((flame) => {
+                flame.style.opacity = '1';
+                flame.style.transform = 'translateX(-50%) scale(1)';
+            });
+        }, 3000);
+    }
+
+    showWishMessage() {
+        const wishDiv = document.createElement('div');
+        wishDiv.innerHTML = `🌟 Make a wish, ${this.birthdayPersonName}! 🌟`;
+        wishDiv.style.position = 'fixed';
+        wishDiv.style.top = '50%';
+        wishDiv.style.left = '50%';
+        wishDiv.style.transform = 'translate(-50%, -50%)';
+        wishDiv.style.fontSize = '2rem';
+        wishDiv.style.color = '#FFD700';
+        wishDiv.style.textShadow = '2px 2px 4px rgba(0,0,0,0.5)';
+        wishDiv.style.zIndex = '10000';
+        wishDiv.style.animation = 'wishPulse 2s ease-in-out';
+        wishDiv.style.textAlign = 'center';
+        wishDiv.style.padding = '20px';
+        wishDiv.style.background = 'rgba(0,0,0,0.7)';
+        wishDiv.style.borderRadius = '20px';
+        
+        document.body.appendChild(wishDiv);
+        
+        setTimeout(() => {
+            if (wishDiv.parentNode) {
+                wishDiv.parentNode.removeChild(wishDiv);
+            }
+        }, 2000);
+    }
+}
+
+// Additional CSS animations for JavaScript effects
+const additionalStyles = `
+    @keyframes cakeShake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+    
+    @keyframes sparkleEffect {
+        0% {
+            transform: scale(0) rotate(0deg);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.5) rotate(180deg);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(0) rotate(360deg);
+            opacity: 0;
+        }
+    }
+    
+    @keyframes wishPulse {
+        0%, 100% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: translate(-50%, -50%) scale(1.1);
+            opacity: 0.9;
+        }
+    }
+`;
+
+// Add additional styles to the document
+const styleSheet = document.createElement('style');
+styleSheet.textContent = additionalStyles;
+document.head.appendChild(styleSheet);
+
+// Initialize the celebration
+const celebration = new BirthdayCelebration();
+
+// Global functions for button onclick
+function startBirthdayCelebration() {
+    celebration.startBirthdayCelebration();
+}
+
+function triggerExtraCelebration() {
+    celebration.triggerExtraCelebration();
+}
+
+function toggleMusic() {
+    celebration.toggleMusic();
+}
